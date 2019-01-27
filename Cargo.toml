@@ -1,0 +1,8 @@
+[package]
+name = "tcp_spy"
+version = "0.1.0"
+authors = ["Gorm Casper <git@mail.gormcasper.dk>"]
+edition = "2018"
+
+[dependencies]
+threadpool = "1.0"

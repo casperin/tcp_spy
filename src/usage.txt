@@ -1,0 +1,3 @@
+usage:
+    tcp_spy 9000 8080
+    will create a server on port 9000 that forwards to port 8080

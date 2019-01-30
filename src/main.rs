@@ -9,7 +9,9 @@ fn main() -> io::Result<()> {
 
     for stream in listener.incoming() {
         let stream = stream?;
-        let _ = handle_incoming(stream);
+        thread::spawn(|| {
+            let _ = handle_incoming(stream);
+        });
     }
 
     Ok(())

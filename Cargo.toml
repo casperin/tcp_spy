@@ -5,4 +5,5 @@ authors = ["Gorm Casper <git@mail.gormcasper.dk>"]
 edition = "2018"
 
 [dependencies]
-threadpool = "1.0"
+structopt = "0.2"
+

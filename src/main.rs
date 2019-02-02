@@ -1,26 +1,19 @@
-use std::env;
+/* #[macro_use] */
+extern crate structopt;
+
 use std::io::prelude::*;
 use std::io::{self, Write};
 use std::net::{Shutdown, TcpListener, TcpStream};
 use std::sync::mpsc;
 use std::thread;
 
-fn main() {
-    let args: Vec<String> = env::args().collect();
-    if args.len() < 3 {
-        println!(include_str!("./usage.txt"));
-        return;
-    }
-    let source_host = format!("127.0.0.1:{}", args[1]);
-    let target_port = &args[2];
-    let target_host = if target_port.contains(":") {
-        format!("{}", target_port)
-    } else {
-        format!("127.0.0.1:{}", target_port)
-    };
+mod args;
 
-    let listener =
-        TcpListener::bind(source_host).expect(&format!("Couldn't create server on {}", &args[0]));
+fn main() {
+    let opt = args::from_args();
+
+    let listener = TcpListener::bind(&opt.source)
+        .expect(&format!("Couldn't create server on {}", &opt.source));
 
     for stream in listener.incoming() {
         let stream = match stream {
@@ -31,10 +24,10 @@ fn main() {
             }
         };
 
-        let host = target_host.clone();
+        let opt = opt.clone();
         thread::spawn(|| {
-            if let Err(e) = handle_incoming(stream, host) {
-                eprintln!("{}", e);
+            if let Err(e) = handle_incoming(stream, opt) {
+                eprintln!("1 {}", e);
             }
         });
     }
@@ -45,9 +38,9 @@ enum Event {
     FromTarget([u8; 512], usize),
 }
 
-fn handle_incoming(mut source: TcpStream, target_host: String) -> io::Result<()> {
+fn handle_incoming(mut source: TcpStream, opt: args::Opt) -> io::Result<()> {
     let mut source2 = source.try_clone()?;
-    let mut target = TcpStream::connect(target_host)?;
+    let mut target = TcpStream::connect(opt.target)?;
     let mut target2 = target.try_clone()?;
     let (tx, rx) = mpsc::channel();
     let tx2 = tx.clone();
